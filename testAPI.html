@@ -1,0 +1,158 @@
+<!doctype html>
+<html>
+  <head>
+	  <meta charset="UTF-8">
+    <title>TEST NODE ServerAPI</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial;}
+      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; height: 50px; }
+      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%;font-size: large;height: 50px; }
+      form button.send { width: 9%; background: rgb(255, 0, 250); border: none; padding: 10px; font-size: large;height: 50px;}
+      #messages { list-style-type: none; margin: 0; padding: 0; height: 50%; bottom: 1 ;margin-bottom: 100px;}
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+	  #messages li.mymsg {background-color: #ABF0F0;font-size: medium;text-align: right;}
+	  #messages li.other {background-color: antiquewhite;font-size: medium;text-align: left;}
+	  #messages li.other b {background-color: antiquewhite;font-size: medium;text-align: left; color: yellowgreen;}
+	  #messages li.join {background-color: antiquewhite;font-size: small;text-align: center; text-decoration: antiquewhite;}
+    </style>
+  </head>
+  <body>
+    <form action="">
+      <input id="m" autocomplete="off" oninput="changeFunction()"/><button class="send">Send</button>
+    </form>
+    <ul id="messages"></ul>
+
+	<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+	<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+	<script>
+	
+  //AWS server: http://52.68.104.55:8222	
+	 var socket = io("http://192.168.0.219:8222");
+	  //send joinchat event
+	  socket.emit('connect_begin', "{\"user_id\":10,\"room_id\":1,\"uuid\":\"555d74550ea21\"}");
+	  //handler for list all connected user
+	
+	 socket.on('connect_begin_end', function(data) {
+		  console.log("connect end");
+		 console.log(data); 
+		 socket.emit('connect_select_team', "{\"user_id\":10,\"room_id\":1,\"team_id\":2,\"uuid\":\"555d74550ea21\"}");
+		 
+		 socket.emit('connect_select_unit', "{\"room_id\":1,\"user_id\":10,\"team_id\":2,\"unit_id\":4,\"mst_unit\":{\"mst_unit_id\":4,\"hp_heal\":400,\"hp\":1800,\"mp\":120,\"mp_heal\":20,\"attack\":350,\"attack_range\":135,\"attack_speed\":1,\"defence\":180,\"move_speed\":270,\"element\":3,\"position_x\":0,\"position_y\":0,\"mst_skill_id1\":4,\"mst_skill_id2\":5},\"uuid\":\"555d74550ea21\"}");
+		 
+		 socket.emit('connect_select_skill',"{\"room_id\":1,\"team_id\":2,\"user_id\":10,\"unit_id\":4,\"player_skill_list\":[10,9],\"uuid\":\"555d74550ea21\"}")
+		 
+		 socket.emit('connect_ready', "{\"room_id\":1,\"team_id\":2,\"user_id\":10,\"unit_id\":4,\"player_skill_list\":[10,9],\"uuid\":\"555d74550ea21\"}")
+	  });
+	  
+	  socket.on('room_public_connect', function(data) {
+		 console.log("Room public connect");
+		 console.log(data); 
+	  });
+	  socket.on('room_public_select_team_end', function(data) {
+		  console.log('room public team select end');
+		  console.log(data);
+	  });
+	  
+	  socket.on('room_public_select_unit_end', function(data) {
+		 console.log("SElect Unit end");
+		 console.log(data); 
+	  });
+	  
+	  socket.on('room_public_select_skill_end', function(data) {
+		  console.log("Select Skill end");
+		 console.log(data); 
+	  });
+	  
+	  socket.on('room_public_battle_start', function(data) {
+		  console.log("battle start");
+		 console.log(data); 
+	  });
+	  
+	  socket.on('move_sync_end', function(data) {
+		 console.log("Move SYNC END");
+		 console.log(data); 
+	  });
+	  
+	  socket.on('unit_move_end', function(data) {
+		 console.log("Unit move end data");
+		 console.log(data); 
+	  });
+	  
+	  socket.on('battle_public_dead', function (data) {
+		 console.log("Battle public unit dead");
+		 console.log(data); 
+	  });
+	  
+	  socket.on("battle_public_batle_end", function(data) {
+		 console.log("battle End");
+		 console.log(data); 
+	  });
+	  
+	  socket.on("room_public_disconnect", function(data) {
+		 console.log("Disconnect");
+		 console.log(data); 
+	  });
+	  
+	  socket.on('init', function(data) {
+
+		  $('#messages').append($('<li class="join">').append(data + " đang tham gia chat "));
+	  });
+	  //handler for another user exit room
+	  socket.on('exit', function(data) {
+
+		 if(data != null) {
+			  $('#messages').append($('<li class="join">').append(data.name + " đã thoát")); 
+		 }
+		
+	  });
+	  //handler for another
+	  socket.on('join', function(data) {
+		  $('#messages').append($('<li class="join">').append(data.name + " đã tham gia chat "));
+	  });
+	  
+	  function changeFunction() {
+		  console.log("onchange");
+	  }
+	  
+	  $('form').submit(function(){
+      if(String($('#m').val()).length < 1) {
+        return false;
+      }
+	    socket.emit('message',"<b>"+person + " nói</b>: "+ $('#m').val());
+      var str = $('#m').val();
+      for (var index = 0; index < emotions.length; index++) {
+       do {
+         // code...
+                str = str.replace(emotions[index]['syntax'],'<span class="emotion"><img src="jemotion/emotions/'+emotions[index]['icon']+'" title="'+emotions[index]['title']+'"/></span>' );
+       } while (str.indexOf(emotions[index]['syntax']) != -1); 
+
+     }
+	$('#messages').append($('<li class="mymsg">').append(str));
+      window.scrollBy(0,400);
+	    $('#m').val('');
+
+	    return false;
+	  });
+	  
+	  
+	    socket.on('message', function(data) {
+		  console.log(window.innerHeight); 
+    //window.scrollTo(0,document.body.scrollHeight + 200);
+     window.scrollBy(0,400);
+     console.log(document.body.scrollHeight);
+     console.log(document.body.scrollTop);
+     var str = data.message;
+     for (var index = 0; index < emotions.length; index++) {
+       do {
+         // code...
+                str = str.replace(emotions[index]['syntax'],'<span class="emotion"><img src="jemotion/emotions/'+emotions[index]['icon']+'" title="'+emotions[index]['title']+'"/></span>' );
+       } while (str.indexOf(emotions[index]['syntax']) != -1);
+     }
+		  $('#messages').append($('<li class="other">').append(str));
+	  });
+	</script>
+	
+  </body>
+</html>

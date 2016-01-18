@@ -2,47 +2,82 @@
 <html>
   <head>
     <!-- Favicon -->
-    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="https://awsmedia.s3.amazonaws.com/favicon.ico" type="image/ico"></link>
+    <link rel="shortcut icon" type="image/ico" href="https://awsmedia.s3.amazonaws.com/favicon.ico"></link>
+
 	  <meta charset="UTF-8">
     <!-- Page 's title -->
-    <title>Socket.IO chat by PcLONG</title>
+    <title>EC2 Management Console</title>
     <!-- Inline CSS -->
     <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
       body { font: 13px Helvetica, Arial;}
-      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; height: 50px; }
-      form input.my { border: 0; padding: 10px; width: 80%; margin-right: .5%;font-size: large;height: 50px; }
-  	  form button.icon { width: 9%; background: rgb(0, 220, 250); border: none; padding: 10px; font-size: large;height: 50px;}
-      form button.send { width: 9%; background: rgb(255, 0, 250); border: none; padding: 10px; font-size: large;height: 50px;}
+      form { padding: 1px; position: fixed; left: 240px; bottom: 2px; width: 100%; height: 30px;}
+      form input.my { left: 400px;border: 1px dashed red; width: 80%; margin-right: .5%;font-size: large;height: 30px; background: transparent; color: white; font-size: 12px;}
+  	  form button.icon { width: 9%; font-size: large;height: 30px; width: 70px; font: bold 14px/1.3em "Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;padding: 5px 10sdfsdpx;color: white; background: transparent;border: none;}
+      form button.send { width: 9%; font-size: large;height: 30px; font: bold 14px/1.3em "Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;padding: 5px 10px;border-radius: 5px;cursor: pointer;color: #FFF;border: 1px solid #16B;background: transparent -moz-linear-gradient(center top , #38D 0%, #16B) repeat scroll 0% 0%;box-shadow: 0px 0px 0px transparent, 0px 0px 2px #7AC inset;text-shadow: 0px 1px 0px #1954A7, 0px 0px 0px rgba(255, 255, 255, 0);}
       #messages { list-style-type: none; margin: 0; padding: 0; height: 50%; bottom: 1 ;margin-bottom: 100px;}
       #messages li { padding: 5px 10px; }
       #messages li:nth-child(odd) { background: #eee; }
-  	  #messages li.mymsg {background-color: #ABF0F0;font-size: medium;text-align: right;}
-  	  #messages li.other {background-color: antiquewhite;font-size: medium;text-align: left;}
-  	  #messages li.other b {background-color: antiquewhite;font-size: medium;text-align: left; color: yellowgreen;}
-  	  #messages li.join {background-color: antiquewhite;font-size: small;text-align: center; text-decoration: antiquewhite;}
+  	  #messages li.mymsg {background-color: #FFF;font-size: medium;text-align: right;}
+  	  /*#messages li.other {background-color: #FFE;font-size: medium;text-align: left;}
+  	  #messages li.other b {background-color: #FFF;font-size: medium;text-align: left; color: yellowgreen;}*/
+  	  #messages li.join {background-color: #FFF;font-size: small;text-align: center; text-decoration: antiquewhite;}
       #dialog div.modal-footer {bottom: 0; position: fixed; right: 50%;}
-      #clean {position: fixed;bottom: 50px; right: 0%;width: 70px; background: rgb(25, 120, 12); border: none; padding: 5px; font-size: large;height: 40px; }
-      #uploader {position: fixed; bottom: 0px; left:  0%; width: 70px; background: #ABF0F0; font-size: large; height: 40px;}
+      #clean {position: fixed;bottom: 50px; right: 5%;width: 10%; font-size: large;height: 30px; font: bold 14px/1.3em "Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;padding: 5px 10px;border-radius: 5px;cursor: pointer;color: #FFF;border: 1px solid #16B;background: transparent -moz-linear-gradient(center top , #38D 0%, #16B) repeat scroll 0% 0%;box-shadow: 0px 0px 0px transparent, 0px 0px 2px #7AC inset;text-shadow: 0px 1px 0px #1954A7, 0px 0px 0px rgba(255, 255, 255, 0);}
+      #uploader {position: fixed; bottom: 0px; right:  0%; width: 70px; background: transparent; font-size: large; height: 40px;}
       #iframe {position: fixed; bottom: 50px; left:  0%; width: 70px; background: #ABF0F0; font-size: large; height: 40px;}
       #uploadform {position: fixed; bottom: 50px; left: 0%; width: 70px; background: ghostwhite; height: 40px;}
       img {
         max-height: 400px;
         max-width: 500px;
       }
+      #messages li.other {
+        background-color: #ffe;
+        position: relative;
+        border-top: 1px solid #E6E6E6;
+      }
+      div.sender-name  {
+        font-weight: bold;
+        font-size: 16px;
+        color: #0000ff;
+        position: relative;
+        left: 2%;
+        width: 95%;
+        white-space: nowrap;
+        overflow: hidden;
+        vertical-align: baseline;
+      }
+
+      div.mesg-content {
+        font-size: medium;
+        position: relative;
+        text-align: left;
+        padding: 0px 45px 0px 46px;
+        vertical-align: baseline;
+      }
+      div.time-text {
+        right: 5px;
+        top: 9px;
+        position: absolute;
+        color: #666;
+        font-size: 11px;
+        vertical-align: baseline;
+      }
+
     </style>
   </head>
 
   <body ng-app="MyApp" ng-controller="MyCtr" background="Capture.PNG">
+  <div id="hide-form">
     <input type="button" id="uploader" value="Upload" onclick="this.onclick()">
-    <button id="clean" ng-click="clean()" type="button">CLEAN</button>
-    <form action="">
+<!--     <button id="clean" ng-click="clean()" type="button">Clean</button>
+ -->    <form action="">
       <button class="icon" ng-click="open()" type="button">Icon</button>
       <input class="my" id="m" autocomplete="off" oninput="changeFunction()" autofocus="autofocus" />
-      <button class="send" type="submit">Send</button>
+      <!-- <button class="send" type="submit">Send</button> -->
     </form>
     <ul id="messages"></ul>
+  </div>
     <div id="dialog" modal="showModal" close="cancel()">
       <div class="modal-header">
       </div>

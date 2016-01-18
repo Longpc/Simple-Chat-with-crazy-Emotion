@@ -89,6 +89,9 @@ var emotions =  [
 				 {syntax: '(aaa)',title: 'aaa',icon: 'khocthet.gif'},
 				 {syntax: '(notbad)',title: 'notbad',icon: 'notbad.png'},
 				 {syntax: '(suyngam)',title: 'suyngam',icon: 'abc.png'},
+				 {syntax: ':v',title: 'haha',icon: 'fbv.png'},
+				 {syntax: ':3',title: 'humm',icon: 'fb3.png'},
+				 {syntax: '^_^',title: 'hihi',icon: 'fb4.png'},
 				 {syntax: '(wtf)',title: 'wtf',icon: 'wtf.jpg'},
 				 {syntax: '(hobao)',title: 'hobao',icon: 'hobao.jpg'},
 				 {syntax: '(sontung)',title: 'sontung',icon: 'sontung.jpg'},
@@ -161,7 +164,7 @@ if (person == null) {
  }
 //Connect to Node server
 //AWS server http://52.68.104.55:8000
-var socket = io("http://192.168.0.152:8000");
+var socket = io("http://10.50.100.138:8000");
 
 //send joinchat event
 socket.emit('join', {"name" : person});
@@ -190,15 +193,15 @@ socket.on('join', function(data) {
 
 //Handler for another user messages received from server. Parser content and show 
 socket.on('message', function(data) {
-	console.log(window.innerHeight); 
-	//window.scrollTo(0,document.body.scrollHeight + 200);
+	/*console.log(data); 
+	window.scrollTo(0,document.body.scrollHeight + 200);
 	
 	console.log(document.body.scrollHeight);
-	console.log(document.body.scrollTop);
-	var str = data.message;
-	var temp = str.replace("<b>","");
-	var temp2 = temp.replace("</b>","");
-	console.log(window);
+	console.log(document.body.scrollTop);*/
+	var name = data.message.name;
+	var str = data.message.text;
+	var temp2 = name + " nói: "+ str;
+	//console.log(window);
 	notifyMe(temp2);
 	for (var index = 0; index < emotions.length; index++) {
 		do {
@@ -206,8 +209,11 @@ socket.on('message', function(data) {
 			str = str.replace(emotions[index]['syntax'],'<span class="emotion"><img src="jemotion/emotions/'+emotions[index]['icon']+'" title="'+emotions[index]['title']+'"/></span>' );
 		} while (str.indexOf(emotions[index]['syntax']) != -1);
 	}
-	
-	$('#messages').append($('<li class="other">').append(linkify(str)));
+	//console.log(str);
+	//console.log(linkify(str));
+	var mess = '<li class="other"><div class="sender-name">'+name + '</div><div class="mesg-content">'+linkify(str)+'</div><div class="time-text">'+data.time+'</div></li>';
+	console.log(mess);
+	$('#messages').append($(mess));
 	window.scrollBy(0,400);
 });
 
@@ -291,12 +297,12 @@ $('form').submit(function(){
 		return false;
 	}
 	if(String($('#m').val()) == "(clean)") {
-		$('#messages').empty();
-		$('#m').val('');
-		return false;
+		cleanChatContent();
 	}
 	
-	socket.emit('message',"<b>"+person + " nói</b>: "+ $('#m').val());
+	//socket.emit('message',"<b>"+person + " nói</b>: "+ $('#m').val());
+	socket.emit('message', { name: person, text : $('#m').val()})
+	
 	var str = $('#m').val();
 	for (var index = 0; index < emotions.length; index++) {
 		do {
@@ -311,15 +317,44 @@ $('form').submit(function(){
 	
 	return false;
 });
+
+function cleanChatContent() {
+	$('#messages').empty();
+	$('#m').val('');
+	return false;
+}
+
+//document.getElementById('clean').addEventListener("mouseover", cleanChatContent);
+var onHide = false;
+document.addEventListener("keydown", checkKeyDown, false);
+function checkKeyDown(e) {
+	var keyCode = e.keyCode;
+	if(keyCode == 27) {
+		cleanChatContent();
+	}
+	if(keyCode == 112) {
+		if(!onHide) {
+			document.getElementById("hide-form").style.visibility="hidden";
+			onHide = true;
+		}else {
+			document.getElementById("hide-form").style.visibility="visible"
+			onHide = false;
+		}
+	}
+	if(keyCode == 113) {
+		window.location.href ="https://ap-northeast-1.console.aws.amazon.com/ec2/v2/home?region=ap-northeast-1#Instances:sort=instanceId";
+	}
+}
+
 var uploader = document.getElementById('uploader');
    upclick(
      {
-      element: uploader,
+      element: uploader, 
       action: 'upload.php', 
       onstart:
         function(filename)
         {
-          alert('Start upload: '+filename);
+          //alert('Start upload: '+filename);
         },
       oncomplete:
         function(response_data) 
@@ -338,7 +373,7 @@ var uploader = document.getElementById('uploader');
 			   str = '<a href="'+add+' target="_blank">'+filename+'</a>';
 			   console.log(str);
 		   }
-		   $('#messages').append($('<li class="mymsg">').append(str));
+		   $('#messages').append($('<li class="mymsg" style="border: 2px dashed #aaa">').append(str));
 		  	socket.emit('upload',"<b>"+person + " Uploaded</b>:<<<"+ response_data);
         }
      });
